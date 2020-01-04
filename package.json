@@ -1,0 +1,29 @@
+{
+  "name": "permissions",
+  "version": "0.0.1",
+  "description": "Role-based resource permissions management",
+  "main": "permissions.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanndev/permissions.git"
+  },
+  "keywords": [
+    "access",
+    "control",
+    "permissions",
+    "acl",
+    "security"
+  ],
+  "author": "James Tanner <james.tanner@tanndev.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tanndev/permissions/issues"
+  },
+  "homepage": "https://github.com/tanndev/permissions#readme",
+  "devDependencies": {
+    "mocha": "^6.2.2"
+  }
+}
