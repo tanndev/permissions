@@ -1,0 +1,94 @@
+# This example file defines permissions for a theoretical forum with admins, moderators, users, and visitors.
+
+# Define what a user account looks like.
+users:
+  id: uid               # Users are uniquely identified by user.uid
+  roles: effectiveRoles # Users roles are fetched from user.effectiveRoles
+
+# Define all the resources on the system.
+resources:
+  # Define an account resource which represents a user's account.
+  # Account ownership is defined by comparing account.uid to the user's id.
+  account:
+    ownership: uid
+
+  # Define a thread, which represents a conversation on the forum.
+  # Thread ownership is defined by comparing thread.startedBy to the user's id.
+  # Threads also contain nested post resources, in an array, as `thread.posts`
+  thread:
+    ownership: startedBy
+    resources:
+      - property: posts
+        resource: post
+        type: array
+
+  # Define a post, which represents a comment posted in a thread.
+  # Post ownership is defined by comparing post.poster to the user's id.
+  post:
+    ownership: postedBy
+
+# Define all the roles, and their permissions.
+roles:
+  admin:
+    _extends: [moderator]
+    account:
+      readAny: # Admins can read the usernames and emails of other accounts
+        - username
+        - email
+      deleteAny: ['*'] # Admins can delete any account.
+    thread:
+      deleteAny: ['*'] # Admins can delete any thread entirely.
+    post:
+      deleteAny: ['*'] # Admins can delete any post entirely.
+
+
+  # Moderators can do everything a user can do, but have extra ability to modify other user's posts.
+  moderator:
+    _extends: [user] # Moderators inherit all the permissions of users.
+    account:
+      updateOther: [bannedUntil] # Moderators can ban/unban other user's accounts.
+    thread:
+      updateAny: [lock] # Moderators can lock/unlock any thread.
+    post:
+      deleteAny: [content] # Moderators can delete the content of any post, but not the rest of it.
+
+  # Regular users can read the forum, create posts and threads, and edit their own accounts.
+  # Note that the user role shares a number of permissions with the visitor role, but doesn't extend it.
+  #  This is because visitors have an additional permission (the ability to create accounts) that users should not
+  #  inherit. Another option would be to add another role which contains the shared permissions and have both user and
+  #  visitor extend that role.
+  user:
+    account:
+      readOwn: ['*'] # Users can read the entirety of their own account.
+      readAny: # Users can read the uid and friendly name of any account.
+        - uid
+        - friendlyName
+      updateOwn: # Users can update their own accounts.
+        - friendlyName
+        - username
+        - password
+        - email
+      deleteOwn: ['*'] # Users can delete their own accounts.
+    thread:
+      createOwn: ['*'] # Users can create their own threads.
+      readAny: ['*'] # Users can read any thread.
+    post:
+      createOwn: ['*'] # Users can create their own posts.
+      updateOwn: [content] # Users can edit the content of their own posts.
+      readAny: ['*'] # Users can read any post.
+
+  # Visitors can read the forum and create accounts, but that's all.
+  visitor:
+    account:
+      createOwn: # Visitors can create an account, but only with certain fields.
+        - friendlyName
+        - username
+        - password
+        - email
+      readAny: # Visitors can read the uid and friendly name of any account.
+        - uid
+        - friendlyName
+    thread:
+      readAny: ['*'] # Visitors can read any thread.
+    post:
+      readAny: ['*'] # Visitors can read any post.
